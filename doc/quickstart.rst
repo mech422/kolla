@@ -55,13 +55,13 @@ and OverlayFS. In order to update kernel in Ubuntu 14.04 LTS to 4.2, run:
 =====================   ===========  ===========  =========================
 Component               Min Version  Max Version  Comment
 =====================   ===========  ===========  =========================
-Ansible                 1.9.4        < 2.0.0      On deployment host
+Ansible                 2.0.0        none         On deployment host
 Docker                  1.10.0       none         On target nodes
 Docker Python           1.6.0        none         On target nodes
 Python Jinja2           2.8.0        none         On deployment host
 =====================   ===========  ===========  =========================
 
-Make sure the ``pip`` package manager is installed before proceeding:
+Make sure the ``pip`` package manager is installed and upgraded to latest before proceeding:
 
 ::
 
@@ -71,6 +71,10 @@ Make sure the ``pip`` package manager is installed before proceeding:
 
     # Ubuntu 14.04 LTS
     apt-get -y install python-pip
+
+    # Upgrade pip and check version
+    pip install -U pip
+    pip -V
 
 
 Since Docker is required to build images as well as be present on all deployed
@@ -186,6 +190,7 @@ libvirt may be running at a time.
 On Ubuntu, apparmor will sometimes prevent libvirt from working.
 
 ::
+
    /usr/sbin/libvirtd: error while loading shared libraries: libvirt-admin.so.0: cannot open shared object file: Permission denied
 
 If you are seeing the libvirt container fail with the error above, disable the
@@ -201,10 +206,9 @@ Ansible from distribution packaging if the distro packaging has recommended
 version available.
 
 Some implemented distro versions of Ansible are too old to use distro
-packaging. Currently, CentOS and RHEL package Ansible 1.9.4 which is suitable
-for use with Kolla. As Ansible 2.0 is also available, version 1.9 must be
-specified. Note that you will need to enable access to the EPEL repository to
-install via yum -- to do so, take a look at Fedora's EPEL
+packaging. Currently, CentOS and RHEL package Ansible >2.0 which is suitable
+for use with Kolla. Note that you will need to enable access to the EPEL
+repository to install via yum -- to do so, take a look at Fedora's EPEL
 `docs <https://fedoraproject.org/wiki/EPEL>`__ and
 `FAQ <https://fedoraproject.org/wiki/EPEL/FAQ>`__.
 
@@ -212,15 +216,15 @@ On CentOS or RHEL systems, this can be done using:
 
 ::
 
-    yum -y install ansible1.9
+    yum -y install ansible
 
 Many DEB based systems do not meet Kolla's Ansible version requirements. It is
-recommended to use pip to install Ansible 1.9.4. Finally Ansible 1.9.4 may be
+recommended to use pip to install Ansible >2.0. Finally Ansible >2.0  may be
 installed using:
 
 ::
 
-    pip install -U ansible==1.9.4
+    pip install -U ansible
 
 If DEB based systems include a version of Ansible that meets Kolla's version
 requirements it can be installed by:
@@ -274,9 +278,13 @@ client code:
 To install the clients use:
 
 ::
+
     yum install -y python-openstackclient python-neutronclient
 
-    or
+
+Or using ``pip`` to install:
+
+::
 
     pip install -U python-openstackclient python-neutronclient
 
@@ -313,7 +321,7 @@ For more information refer to
 `_bug 1562334 <https://bugs.launchpad.net/kolla/+bug/1562334>`__.
 
 Building Container Images
-==========================
+=========================
 
 The Kolla community builds and pushes tested images for each tagged release of
 Kolla, but if running from master, it is recommended to build images locally.
@@ -433,7 +441,7 @@ the local registry is operating on IP address 192.168.1.100 and the port 4000.
 
 For *all-in-one* deploys, the following commands can be run. These will
 setup all of the containers on the localhost. These commands will be
-wrapped in the kolla-script in the future. 
+wrapped in the kolla-script in the future.
 
 .. note:: even for all-in-one installs it is possible to use the docker
    registry for deployment, although not strictly required.
@@ -444,6 +452,12 @@ to them:
 ::
 
     kolla-ansible prechecks
+
+Verify that all required images with appropriate tags are available:
+
+::
+
+    kolla-ansible pull
 
 Run the deployment:
 
@@ -498,7 +512,7 @@ available by entering IP address or hostname from ``kolla_external_fqdn``, or
 default to ``kolla_internal_vip_address``.
 
 Useful tools
--------------
+------------
 After successful deployment of OpenStack, run the following command can create
 an openrc file ``/etc/kolla/admin-openrc.sh`` on the deploy node. Or view
 ``tools/openrc-example`` for an example of an openrc that may be used with the
@@ -617,5 +631,5 @@ prompted to create an index. Please create an index using the name ``log-*``.
 This step is necessary until the default Kibana dashboard is implemented in
 Kolla.
 
-.. _Docker Hub Image Registry: https://hub.docker.com/u/kollaglue/
+.. _Docker Hub Image Registry: https://hub.docker.com/u/kolla/
 .. _launchpad bug: https://bugs.launchpad.net/kolla/+filebug

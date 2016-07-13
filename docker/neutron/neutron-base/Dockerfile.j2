@@ -9,6 +9,7 @@ RUN yum -y install \
         openstack-neutron-ml2 \
         openvswitch \
         openstack-neutron-lbaas \
+        python-openvswitch \
     && yum clean all
 
     {% elif base_distro in ['ubuntu'] %}
@@ -17,7 +18,8 @@ RUN apt-get -y install --no-install-recommends \
         neutron-plugin-ml2 \
         neutron-server \
         openvswitch-switch \
-        neutron-lbaas \
+        python-openvswitch \
+        neutron-lbaas-agent \
     && apt-get clean \
     && mkdir -p /usr/share/neutron \
     && ln -s /etc/neutron/api-paste.ini /usr/share/neutron/api-paste.ini
@@ -32,6 +34,7 @@ RUN yum -y install \
         dnsmasq-utils \
         ipset \
         openvswitch \
+        python-openvswitch \
         uuid \
     && yum clean all
 
@@ -45,6 +48,7 @@ RUN apt-get -y install --no-install-recommends \
         ipset \
         iptables \
         openvswitch-switch \
+        python-openvswitch \
         uuid-runtime \
     && apt-get clean
 
@@ -64,11 +68,11 @@ RUN ln -s neutron-base-source/* neutron \
 
 {% endif %}
 
-COPY neutron_sudoers /etc/sudoers.d/neutron_sudoers
+COPY neutron_sudoers /etc/sudoers.d/kolla_neutron_sudoers
 COPY extend_start.sh /usr/local/bin/kolla_extend_start
 
 RUN usermod -a -G kolla neutron \
     && chmod 750 /etc/sudoers.d \
-    && chmod 440 /etc/sudoers.d/neutron_sudoers \
+    && chmod 440 /etc/sudoers.d/kolla_neutron_sudoers \
     && touch /usr/local/bin/kolla_neutron_extend_start \
     && chmod 755 /usr/local/bin/kolla_extend_start /usr/local/bin/kolla_neutron_extend_start

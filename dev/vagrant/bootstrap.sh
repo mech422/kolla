@@ -16,10 +16,8 @@ export https_proxy=
 if [ "$MODE" = 'aio' ]; then
     # Run registry on port 4000 since it may collide with keystone when doing AIO
     REGISTRY_PORT=4000
-    SUPPORT_NODE=operator
 else
     REGISTRY_PORT=5000
-    SUPPORT_NODE=support01
 fi
 REGISTRY_URL="operator.local"
 REGISTRY=${REGISTRY_URL}:${REGISTRY_PORT}
@@ -63,7 +61,7 @@ function prep_work {
 
     # This removes the fqdn from /etc/hosts's 127.0.0.1. This name.local will
     # resolve to the public IP instead of localhost.
-    sed -i -r "s/^(127\.0\.0\.1\s+)(.*) `hostname` (.+)/\1 \3/" /etc/hosts
+    sed -i -r "s,^127\.0\.0\.1\s+.*,127\.0\.0\.1   localhost localhost.localdomain localhost4 localhost4.localdomain4," /etc/hosts
 
     if is_centos; then
         yum -y install epel-release
@@ -129,8 +127,7 @@ EOF
         mkdir -p /etc/systemd/system/docker.service.d
         cat >/etc/systemd/system/docker.service.d/http-proxy.conf <<-EOF
 [Service]
-Environment="HTTP_PROXY=${http_proxy}" "HTTPS_PROXY=${https_proxy}"
-"NO_PROXY=localhost,127.0.0.1,${REGISTRY_URL}"
+Environment="HTTP_PROXY=${http_proxy}" "HTTPS_PROXY=${https_proxy}" "NO_PROXY=localhost,127.0.0.1,${REGISTRY_URL}"
 EOF
 
         if [[ "$(grep http_ /etc/bashrc)" == "" ]]; then
@@ -154,6 +151,8 @@ function configure_kolla {
     # Set network interfaces
     sed -i -r "s,^[# ]*network_interface:.+$,network_interface: \"eth1\"," /etc/kolla/globals.yml
     sed -i -r "s,^[# ]*neutron_external_interface:.+$,neutron_external_interface: \"eth2\"," /etc/kolla/globals.yml
+    # Set VIP address to be on the vagrant private network
+    sed -i -r "s,^[# ]*kolla_internal_vip_address:.+$,kolla_internal_vip_address: \"172.28.128.254\"," /etc/kolla/globals.yml
 }
 
 # Configure the operator node and install some additional packages.
@@ -189,6 +188,7 @@ function configure_operator {
     cat > ~vagrant/.ansible.cfg <<EOF
 [defaults]
 forks=100
+remote_user = root
 
 [ssh_connection]
 scp_if_ssh=True

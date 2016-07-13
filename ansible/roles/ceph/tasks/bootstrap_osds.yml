@@ -1,25 +1,25 @@
 ---
-- name: Looking up disks to bootstrap for Ceph
-  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
+- name: Looking up disks to bootstrap for Ceph OSDs
+  command: docker exec -t kolla_toolbox sudo -E /usr/bin/ansible localhost
     -m find_disks
     -a "partition_name='KOLLA_CEPH_OSD_BOOTSTRAP' match_mode='prefix'"
   register: osd_lookup
   changed_when: "{{ osd_lookup.stdout.find('localhost | SUCCESS => ') != -1 and (osd_lookup.stdout.split('localhost | SUCCESS => ')[1]|from_json).changed }}"
   failed_when: osd_lookup.stdout.split()[2] != 'SUCCESS'
 
-- name: Reading data from variable
+- name: Parsing disk info for Ceph OSDs
   set_fact:
     osds_bootstrap: "{{ (osd_lookup.stdout.split('localhost | SUCCESS => ')[1]|from_json).disks|from_json }}"
 
-- name: Looking up disks to bootstrap for Ceph
-  command: docker exec -t kolla_toolbox /usr/bin/ansible localhost
+- name: Looking up disks to bootstrap for Ceph Cache OSDs
+  command: docker exec -t kolla_toolbox sudo -E /usr/bin/ansible localhost
     -m find_disks
     -a "partition_name='KOLLA_CEPH_OSD_CACHE_BOOTSTRAP' match_mode='prefix'"
   register: osd_cache_lookup
   changed_when: "{{ osd_cache_lookup.stdout.find('localhost | SUCCESS => ') != -1 and (osd_cache_lookup.stdout.split('localhost | SUCCESS => ')[1]|from_json).changed }}"
   failed_when: osd_cache_lookup.stdout.split()[2] != 'SUCCESS'
 
-- name: Reading data from variable
+- name: Parsing disk info for Ceph Cache OSDs
   set_fact:
     osds_cache_bootstrap: "{{ (osd_cache_lookup.stdout.split('localhost | SUCCESS => ')[1]|from_json).disks|from_json }}"
 

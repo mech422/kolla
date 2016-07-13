@@ -26,9 +26,10 @@ DISTRO_RELEASE = {
     'debian': '8',
     'ubuntu': '14.04',
 }
-RDO_MIRROR = "http://trunk.rdoproject.org/centos7"
-DELOREAN = "{}/current-passed-ci/delorean.repo".format(RDO_MIRROR)
-DELOREAN_DEPS = "{}/delorean-deps.repo".format(RDO_MIRROR)
+DELOREAN = ("http://buildlogs.centos.org/centos/7/cloud/x86_64/"
+            "rdo-trunk-master-tested/delorean.repo")
+# TODO(pbourke): update to buildlogs.centos.org once this moves
+DELOREAN_DEPS = "http://trunk.rdoproject.org/centos7/delorean-deps.repo"
 INSTALL_TYPE_CHOICES = ['binary', 'source', 'rdo', 'rhos']
 
 _PROFILE_OPTS = [
@@ -89,7 +90,7 @@ _CLI_OPTS = [
                 help='Show image dependencies (filtering supported)'),
     cfg.BoolOpt('list-images',
                 help='Show all available images'),
-    cfg.StrOpt('namespace', short='n', default='kollaglue',
+    cfg.StrOpt('namespace', short='n', default='kolla',
                deprecated_group='kolla-build',
                help='The Docker namespace name'),
     cfg.BoolOpt('cache', default=True,
@@ -142,6 +143,9 @@ _CLI_OPTS = [
                 help=("Don't build images. Generate Dockerfile only")),
     cfg.IntOpt('timeout', default=120,
                help='Time in seconds after which any operation times out'),
+    cfg.StrOpt('template-override',
+               help='Path to template override file'),
+    cfg.StrOpt('logs-dir', help='Path to logs directory'),
 ]
 
 _BASE_OPTS = [
@@ -202,6 +206,10 @@ SOURCES = {
         'type': 'url',
         'location': ('http://tarballs.openstack.org/keystone/'
                      'keystone-master.tar.gz')},
+    'kuryr': {
+        'type': 'url',
+        'location': ('http://tarballs.openstack.org/kuryr/'
+                     'kuryr-master.tar.gz')},
     'magnum-base': {
         'type': 'url',
         'location': ('http://tarballs.openstack.org/magnum/'
@@ -238,10 +246,18 @@ SOURCES = {
         'type': 'url',
         'location': ('http://github.com/kanaka/noVNC/tarball/'
                      'v0.5.1')},
+    'rally': {
+        'type': 'url',
+        'location': ('http://tarballs.openstack.org/rally/'
+                     'rally-master.tar.gz')},
     'sahara-base': {
         'type': 'url',
         'location': ('http://tarballs.openstack.org/sahara/'
                      'sahara-master.tar.gz')},
+    'senlin-base': {
+        'type': 'url',
+        'location': ('http://tarballs.openstack.org/senlin/'
+                     'senlin-master.tar.gz')},
     'swift-base': {
         'type': 'url',
         'location': ('http://tarballs.openstack.org/swift/'
@@ -254,11 +270,14 @@ SOURCES = {
         'type': 'url',
         'location': ('http://tarballs.openstack.org/trove/'
                      'trove-master.tar.gz')},
+    'watcher-base': {
+        'type': 'url',
+        'location': ('http://tarballs.openstack.org/watcher/'
+                     'watcher-master.tar.gz')},
     'zaqar': {
         'type': 'url',
         'location': ('http://tarballs.openstack.org/zaqar/'
                      'zaqar-master.tar.gz')}
-
 }
 
 
